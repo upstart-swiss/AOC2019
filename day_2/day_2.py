@@ -1,4 +1,4 @@
-
+from abc import ABC, abstractmethod, abstractproperty
 
 def intcode(opcodes: list):
     position = 0
@@ -23,12 +23,88 @@ def intcode(opcodes: list):
             print("Unknown opcode")
             position += 1
     pass
+class OpCode(ABC):
+    
+    def __init__(self, opcodes, current_position):
+        if opcodes[current_position] != self.my_opcode:
+            print(f"Opcode: {opcodes} Position:{current_position}")
+            raise Exception("Bad Opcode")
+        self.opcodes = opcodes
+        self.should_continue = True
+        self.position = current_position
+        self.operation()
+    
+    @abstractproperty
+    def my_opcode(self):
+        pass
+    
+    @abstractmethod
+    def operation(self):
+        pass
 
+class OpCode1(OpCode):
+    @property
+    def my_opcode(self):
+        return 1
+
+    def operation(self):
+        opcodes = self.opcodes
+        position = self.position
+        digit_1 = opcodes[opcodes[position + 1]]
+        digit_2 = opcodes[opcodes[position + 2]]
+        output = opcodes[position + 3]
+        opcodes[output] = digit_1 + digit_2
+        self.position = position + 4
+        self.opcodes = opcodes
+
+class OpCode2(OpCode):
+    @property
+    def my_opcode(self):
+        return 2
+
+    def operation(self):
+        opcodes = self.opcodes
+        position = self.position
+        digit_1 = opcodes[opcodes[position + 1]]
+        digit_2 = opcodes[opcodes[position + 2]]
+        output = opcodes[position + 3]
+        opcodes[output] = digit_1 * digit_2
+        self.position = position + 4
+        self.opcodes = opcodes
+    
+class OpCode99(OpCode):
+    @property
+    def my_opcode(self):
+        return 99
+
+    def operation(self):
+        self.should_continue = False
+
+class OpCodeProcessor:
+    opcode_runners = {
+        1: OpCode1,
+        2: OpCode2,
+        99: OpCode99
+    }
+    def __init__(self, opcodes):
+        self.position = 0
+        self.opcodes = opcodes
+        while self.position < len(self.opcodes):
+            code = self.opcodes[self.position]
+            runner = self.opcode_runners[code]
+            op = runner(self.opcodes, self.position)
+            self.opcodes = op.opcodes
+            self.position = op.position
+            if op.should_continue is False:
+                return
+                
 def test_intcode():
     assert intcode([1,0,0,0,99]) == [2,0,0,0,99]
-    assert intcode([2,3,0,3,99]) == [2,3,0,6,99]
+    assert OpCodeProcessor([2,3,0,3,99]).opcodes == [2,3,0,6,99]
     assert intcode([2,4,4,5,99,0]) == [2,4,4,5,99,9801]
     assert intcode([1,1,1,4,99,5,6,0,99]) == [30,1,1,4,2,5,6,0,99]
+    assert OpCodeProcessor([1,0,0,0,99]).opcodes == [2,0,0,0,99]
+
 
 def find_input(opcodes, desired_output):
     output = 0
