@@ -197,7 +197,7 @@ class OpCodeProcessor:
         while self.position < len(self.opcodes):
             code = self.opcodes[self.position]
             if code % 100 not in self.opcode_runners:
-                print(f"Position {self.position} with opcodes {self._opcodes}")
+                print(f"Position {self.position} with opcodes {self.opcodes}")
                 raise Exception("Failed to run!")
             runner = self.opcode_runners[code % 100]
             # print(f"223 is {self._opcodes[223]}")

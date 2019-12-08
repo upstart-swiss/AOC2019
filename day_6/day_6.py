@@ -104,14 +104,7 @@ class Planet:
         
     def add_parent(self, parent_planet):
         self.parents.append(parent_planet)
-  
-    @property
-    @lru_cache()
-    def answer(self):
-        # Replace with the real variable
-        self.compute_answer()
-        return self._answer()
-    
+      
     def __repr__(self):
         return f"<Planet {self.name}>"
 
