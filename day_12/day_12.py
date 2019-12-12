@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from math import gcd 
+from functools import reduce # Needed for Python3.x
 
 class Moon:
     def __init__(self, position=[0,0,0], velocity=[0,0,0]):
@@ -97,9 +99,37 @@ class System2(System):
             if moon.in_original is False:
                 return False
         return True
+    
+    def same_position(self, index):
+        for moon in self.moons:
+            if moon.position[index] != moon.original_position[index]:
+                return False
+        return True
+    
+    def get_base_originals(self, limit=-1):
+        indexes = [None, None, None]
+        while None in indexes:
+            for i in range(3):
+                if indexes[i] is None and self.same_position(i):
+                    indexes[i] = self.time + 1 # For some reason my time is 1 behind
+            if limit != -1:
+                if self.time > limit:
+                    return False
+            self.time_step()
+        return indexes
+    @staticmethod
+    def lcm(denominators):
+        return reduce(lambda a,b: a*b // gcd(a,b), denominators)
 
     def loop_to_original(self, limit=-1):
+        indexes = [None, None, None]
         while not self.in_original:
+            for i in range(3):
+                if indexes[i] is None and self.same_position(i):
+                    indexes[i] = self.time + 1
+            if None not in indexes:
+                print(f"Indexes full {indexes}")
+                break
             if limit != -1:
                 if self.time > limit:
                     return False
@@ -142,6 +172,7 @@ def test_pt2():
     system_2.time_step()
     system_2.loop_to_original(limit=2772)
     assert system_2.time == 2772
+    assert False
     answer1 = None
 
     input2 = ""
@@ -163,4 +194,7 @@ if __name__ == "__main__":
     system_1 = System2(moons=moons_1)
     system_1.time_step(1000)
     print(f"Energy: {system_1.total_energy}")
-    system_1.loop_to_original()
+    original_multiples = system_1.get_base_originals()
+    answer = system_1.lcm(original_multiples)
+    print(f"Answer pt2: {answer}")
+    #system_1.loop_to_original()
