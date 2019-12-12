@@ -392,7 +392,7 @@ if __name__ == "__main__":
     m5 = LaserMap(map_5)
     most = find_most_asteroids(map_5)
     print(f"Most found at {most}") # 11,13
-    supershot = m5.rotate(most, 200)
+    supershot = m5.spray_and_pray(most, 200)
     print(f"199th shot is {supershot[199]}")
 
 #     m = Map(map1, debug=True)
